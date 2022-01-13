@@ -23,11 +23,11 @@ parser = defaults.add_args_to_parser(defaults.PGD_ARGS, parser)
 # Custom arguments
 parser.add_argument('--dataset', type=str, default='cifar',
                     help='Dataset (Overrides the one in robustness.defaults)')
-parser.add_argument('--model-path', type=str, default='')
+parser.add_argument('--s_model-path', type=str, default='')
 parser.add_argument('--resume', action='store_true',
                     help='Whether to resume or not (Overrides the one in robustness.defaults)')
 parser.add_argument('--pytorch-pretrained', action='store_true',
-                    help='If True, loads a Pytorch pretrained model.')
+                    help='If True, loads a Pytorch pretrained s_model.')
 parser.add_argument('--cifar10-cifar10', action='store_true',
                     help='cifar10 to cifar10 transfer')
 parser.add_argument('--subset', type=int, default=None,
@@ -37,7 +37,7 @@ parser.add_argument('--no-tqdm', type=int, default=1,
 parser.add_argument('--no-replace-last-layer', action='store_true',
                     help='Whether to avoid replacing the last layer')
 parser.add_argument('--freeze-level', type=int, default=-1,
-                    help='Up to what layer to freeze in the pretrained model (assumes a resnet architectures)')
+                    help='Up to what layer to freeze in the pretrained s_model (assumes a resnet architectures)')
 parser.add_argument('--additional-hidden', type=int, default=0,
                     help='How many hidden layers to add on top of pretrained network + classification layer')
 parser.add_argument('--per-class-accuracy', action='store_true', help='Report the per-class accuracy. '
@@ -45,7 +45,7 @@ parser.add_argument('--per-class-accuracy', action='store_true', help='Report th
 
 
 def main(args, store):
-    '''Given arguments and a cox store, trains as a model. Check out the 
+    '''Given arguments and a cox store, trains as a s_model. Check out the
     argparse object in this file for argument options.
     '''
     ds, train_loader, validation_loader = get_dataset_and_loaders(args)
@@ -64,12 +64,12 @@ def main(args, store):
     model, checkpoint = get_model(args, ds)
 
     # if args.eval_only:
-    #     return train.eval_model(args, model, validation_loader, store=store)
+    #     return train.eval_model(args, s_model, validation_loader, store=store)
     #
-    # update_params = freeze_model(model, freeze_level=args.freeze_level)
+    # update_params = freeze_model(s_model, freeze_level=args.freeze_level)
     #
     # print(f"Dataset: {args.dataset} | Model: {args.arch}")
-    # train.train_model(args, model, (train_loader, validation_loader), store=store,
+    # train.train_model(args, s_model, (train_loader, validation_loader), store=store,
     #                   checkpoint=checkpoint, update_params=update_params)
     return model
 
@@ -140,7 +140,7 @@ def get_dataset_and_loaders(args):
 
 
 def resume_finetuning_from_checkpoint(args, ds, finetuned_model_path):
-    '''Given arguments, dataset object and a finetuned model_path, returns a model
+    '''Given arguments, dataset object and a finetuned model_path, returns a s_model
     with loaded weights and returns the checkpoint necessary for resuming training.
     '''
     print('[Resuming finetuning from a checkpoint...]')
@@ -149,8 +149,8 @@ def resume_finetuning_from_checkpoint(args, ds, finetuned_model_path):
             arch=pytorch_models[args.arch](
                 args.pytorch_pretrained) if args.arch in pytorch_models.keys() else args.arch,
             dataset=datasets.ImageNet(''), add_custom_forward=args.arch in pytorch_models.keys())
-        while hasattr(model, 'model'):
-            model = model.model
+        while hasattr(model, 's_model'):
+            model = model.s_model
         model = fine_tunify.ft(
             args.arch, model, ds.num_classes, args.additional_hidden)
         model, checkpoint = model_utils.make_and_restore_model(arch=model, dataset=ds, resume_path=finetuned_model_path,
@@ -162,7 +162,7 @@ def resume_finetuning_from_checkpoint(args, ds, finetuned_model_path):
 
 
 def get_model(args, ds):
-    '''Given arguments and a dataset object, returns an ImageNet model (with appropriate last layer changes to 
+    '''Given arguments and a dataset object, returns an ImageNet s_model (with appropriate last layer changes to
     fit the target dataset) and a checkpoint.The checkpoint is set to None if noe resuming training.
     '''
     finetuned_model_path = os.path.join(
@@ -186,11 +186,11 @@ def get_model(args, ds):
         # if not args.no_replace_last_layer and not args.eval_only:
         #     print(f'[Replacing the last layer with {args.additional_hidden} '
         #           f'hidden layers and 1 classification layer that fits the {args.dataset} dataset.]')
-        #     while hasattr(model, 'model'):
-        #         model = model.model
-        #     model = fine_tunify.ft(
-        #         args.arch, model, ds.num_classes, args.additional_hidden)
-        #     model, checkpoint = model_utils.make_and_restore_model(arch=model, dataset=ds,
+        #     while hasattr(s_model, 's_model'):
+        #         s_model = s_model.s_model
+        #     s_model = fine_tunify.ft(
+        #         args.arch, s_model, ds.num_classes, args.additional_hidden)
+        #     s_model, checkpoint = model_utils.make_and_restore_model(arch=s_model, dataset=ds,
         #                                                            add_custom_forward=args.additional_hidden > 0 or args.arch in pytorch_models.keys())
         # else:
         #     print('[NOT replacing the last layer]')
@@ -199,7 +199,7 @@ def get_model(args, ds):
 
 def freeze_model(model, freeze_level):
     '''
-    Freezes up to args.freeze_level layers of the model (assumes a resnet model)
+    Freezes up to args.freeze_level layers of the s_model (assumes a resnet s_model)
     '''
     # Freeze layers according to args.freeze-level
     update_params = None

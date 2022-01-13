@@ -21,7 +21,7 @@ class InfoDrop(Attack):
     r"""
     Distance Measure : l_inf bound on quantization table
     Arguments:
-        model (nn.Module): model to attack.
+        model (nn.Module): s_model to attack.
         steps (int): number of steps. (DEFALUT: 40)
         batch_size (int): batch size
         q_size: bound for quantization table

@@ -36,6 +36,6 @@ def ft(model_name, model_ft, num_classes, additional_hidden=0):
         model_ft.classifier[1] = nn.Linear(num_ftrs, num_classes)
         input_size = 224
     else:
-        raise ValueError("Invalid model type, exiting...")
+        raise ValueError("Invalid s_model type, exiting...")
 
     return model_ft

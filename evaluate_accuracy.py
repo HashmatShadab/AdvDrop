@@ -47,14 +47,14 @@ from torchvision import transforms
 from torchvision import models
 
 imagenet_ds = ImageNet('/tmp/')
-# model , _ = model_utils.make_and_restore_model(arch='resnet50', dataset=imagenet_ds,
+# s_model , _ = model_utils.make_and_restore_model(arch='resnet50', dataset=imagenet_ds,
 #                                                           resume_path="/home/hashmat.malik/PycharmProjects/Thesis/Robust Model Checkpoints/MadryLab/ResNet50/L2/imagenet_l2_3_0.pt", parallel=False)
 
 ## timm models
-# model  = diet_small().to(device=device)
-# config = resolve_data_config({}, model = model)
+# s_model  = diet_small().to(device=device)
+# config = resolve_data_config({}, s_model = s_model)
 # transform = create_transform(**config)
-### torch model
+### torch s_model
 model = models.resnet50(pretrained=True).to(device=device)
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
