@@ -30,11 +30,11 @@ from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 
 source_model = ["resnet"]
-target_model = [diet_tiny]
+target_model = [diet_small]
 
 
 model_t = ["resnet", vit_tiny, vit_small, diet_tiny, diet_small]
-q_sizes = [20, 60]
+q_sizes = [20, 60, 100]
 attacks = [False, True]
 model_names = ["ResNet50", "ViT_tiny", "ViT_small", "DieT_tiny", "DieT_small"]
 
@@ -110,7 +110,7 @@ def build_model(model):
     return backbone, norm_layer, transform
 
 if __name__ == "__main__":
-    f = open("results/transferability_results.txt", "w")
+    f = open("results/transferability_results_resnet50_to_diet_small.txt", "w")
 
     for att in attacks:
         idx_ = 0
@@ -169,7 +169,7 @@ if __name__ == "__main__":
                         labels = torch.from_numpy(np.random.randint(0, 1000, size=images.shape[0]))
 
                     images = images * 255.0
-                    steps = 20 if targetted_attack else 50   # change again from 20 to 500
+                    steps = 500 if targetted_attack else 50   # change again from 20 to 500
                     attack = InfoDrop(s_model, batch_size=images.shape[0],
                                       q_size=q_size, steps=steps,
                                       targeted=targetted_attack)

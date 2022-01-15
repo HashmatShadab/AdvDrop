@@ -30,8 +30,8 @@ from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 
 model_t = ["resnet", vit_tiny, vit_small, diet_tiny, diet_small]
-q_sizes = [10, 15]
-attacks = [True, False]
+q_sizes = [20,60,100]
+attacks = [False]
 model_names = ["ResNet50", "ViT_tiny", "ViT_small", "DieT_tiny", "DieT_small"]
 
 
@@ -82,7 +82,7 @@ def lpips_2imgs(img_batch0, img_batch1, version="0.1", use_gpu=True):
 
 
 if __name__ == "__main__":
-    f = open("results_all_smaller_q.txt", "w")
+    f = open("results/results_all_normal_q.txt", "w")
 
     for att in attacks:
         idx_ = 0
@@ -183,9 +183,9 @@ if __name__ == "__main__":
                 print('Avg suc rate: %.5f +/- %.5f' % (
                 suc_cnt / len(normal_data), stderr_dist))
                 print(f"Fool Rate {q_size} is : {fool_rate / len(normal_data)}")
-                print(f"Average Similarity score: {lpips_score / len(normal_data)}")
+                print(f"Average Similarity score: {lpips_score / len(normal_loader)}")
                 f.write(
-                    f"{name}_{q_size},{(suc_cnt / len(normal_data))}, {stderr_dist}, {fool_rate / len(normal_data)}, {lpips_score / len(normal_data)} \n")
+                    f"{name}_{q_size},{(suc_cnt / len(normal_data))}, {stderr_dist}, {fool_rate / len(normal_data)}, {lpips_score / len(normal_loader)} \n")
             idx_ += 1
 
     f.close()

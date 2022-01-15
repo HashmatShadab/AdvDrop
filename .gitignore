@@ -5,6 +5,7 @@ results/
 .idea/
 outdir/
 pretrained-models/
+.vscode/
 
 
 
