@@ -111,7 +111,7 @@ class InfoDrop(Attack):
             if suc_rate >= 1:
                 print('End at step {} with suc. rate {}'.format(i, suc_rate))
                 q_images = torch.clamp(rgb_images, min=0, max=255.0).detach()
-                return q_images, pre, i
+                return q_images, pre, i, rgb_images
         q_images = torch.clamp(rgb_images, min=0, max=255.0).detach()
 
-        return q_images, pre, q_table
+        return q_images, pre, q_table, rgb_images

@@ -30,7 +30,7 @@ from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 
 source_model = ["resnet"]
-target_model = [diet_small]
+target_model = ["resnet"]
 
 
 model_t = ["resnet", vit_tiny, vit_small, diet_tiny, diet_small]
@@ -110,7 +110,7 @@ def build_model(model):
     return backbone, norm_layer, transform
 
 if __name__ == "__main__":
-    f = open("results/transferability_results_resnet50_to_diet_small.txt", "w")
+    f = open("results/transferability.txt", "w")
 
     for att in attacks:
         idx_ = 0
@@ -173,17 +173,19 @@ if __name__ == "__main__":
                     attack = InfoDrop(s_model, batch_size=images.shape[0],
                                       q_size=q_size, steps=steps,
                                       targeted=targetted_attack)
-                    at_images, at_labels, suc_step = attack(images, labels)
+                    # Add unclamped adv images
+                    at_images, at_labels, suc_step, at_images_unclamped = attack(images, labels)
 
                     ### Calculate fool rate on the target s_model
 
                     labels_before_attack = t_model(images.to(device="cuda"))
                     _, labels_before_attack = torch.max(labels_before_attack.data, 1)
 
-                    labels_after_attack = t_model(at_images.to(device="cuda"))
+                    labels_after_attack = t_model(at_images_unclamped.to(device="cuda"))
                     _, labels_after_attack = torch.max(
                         labels_after_attack.data, 1)
-
+                    if (labels_after_attack == at_labels).sum() != 20:
+                        print("different results")
                     fool_rate += torch.sum(labels_before_attack != labels_after_attack)
 
 
