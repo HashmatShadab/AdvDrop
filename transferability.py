@@ -30,7 +30,7 @@ from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 
 source_model = ["resnet"]
-target_model = ["resnet"]
+target_model = [diet_tiny]
 
 
 model_t = ["resnet", vit_tiny, vit_small, diet_tiny, diet_small]
@@ -90,12 +90,18 @@ def lpips_2imgs(img_batch0, img_batch1, version="0.1", use_gpu=True):
     return dist01
 
 
-def build_model(model):
+def build_model(model, adver=False):
+    """
+    Builds the model and the norm layer
+    adver=True means the adversarial images will be passed through the model,
+    no need of resizing for that case.
+    """
     if model == "resnet":
         transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(), ]
-        )
+                                        transforms.Resize((224, 224)),
+                                        transforms.ToTensor(), ]
+                                        ) \
+            if not adver else transforms.Compose([transforms.ToTensor(),])
         norm_layer = Normalize(mean=[0.485, 0.456, 0.406],
                                std=[0.229, 0.224, 0.225])
         backbone = models.resnet50(pretrained=True)
@@ -105,6 +111,7 @@ def build_model(model):
         config = resolve_data_config({}, model=backbone)
         transform = create_transform(**config)
         transform.transforms.pop()
+        transform = transform if not adver else transforms.Compose([transforms.ToTensor(),])
         norm_layer = Normalize(mean=config['mean'],
                                std=config['std'])
     return backbone, norm_layer, transform
@@ -132,8 +139,8 @@ if __name__ == "__main__":
                 class2label = [class_idx[str(k)][0] for k in
                                range(len(class_idx))]
 
-                backbone_s, norm_layer_s, transform_s = build_model(s)
-                backbone_t, norm_layer_t, transform_t = build_model(t)
+                backbone_s, norm_layer_s, transform_s = build_model(s, adver=False)
+                backbone_t, norm_layer_t, transform_t = build_model(t, adver=True)
 
                 s_model = nn.Sequential(norm_layer_s, backbone_s.to(device))
                 s_model = s_model.eval()

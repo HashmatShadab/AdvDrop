@@ -1,18 +1,5 @@
-import numpy as np
-import json
-import os
-import sys
-import time
-import math
-import io
-import torch
 import torch.nn as nn
-import torch.optim as optim
-from torchvision import models
-import torchvision.datasets as dsets
-import torchvision.transforms as transforms
 from  torchattacks.attack import Attack
-from utils import *
 from compression import *
 from decompression import *
 
