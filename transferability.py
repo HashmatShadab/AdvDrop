@@ -30,12 +30,12 @@ from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 
 source_model = ["resnet"]
-target_model = [diet_tiny]
+target_model = ["resnet18"]
 
 
 model_t = ["resnet", vit_tiny, vit_small, diet_tiny, diet_small]
 q_sizes = [20, 60, 100]
-attacks = [False, True]
+attacks = [False]
 model_names = ["ResNet50", "ViT_tiny", "ViT_small", "DieT_tiny", "DieT_small"]
 
 """
@@ -105,6 +105,17 @@ def build_model(model, adver=False):
         norm_layer = Normalize(mean=[0.485, 0.456, 0.406],
                                std=[0.229, 0.224, 0.225])
         backbone = models.resnet50(pretrained=True)
+
+    elif model == "resnet18":
+        transform = transforms.Compose([
+                                        transforms.Resize((224, 224)),
+                                        transforms.ToTensor(), ]
+                                        ) \
+            if not adver else transforms.Compose([transforms.ToTensor(),])
+        norm_layer = Normalize(mean=[0.485, 0.456, 0.406],
+                               std=[0.229, 0.224, 0.225])
+        backbone = models.resnet18(pretrained=True)
+
     else:
 
         backbone = model()
